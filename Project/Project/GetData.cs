@@ -159,7 +159,7 @@ namespace Project
         {
             string ReturnValue = null;
             string Routing = log.Routing;
-            if (Routing.Contains(".gif") || Routing.Contains(".css") || Routing.Contains(".img") || Routing.Contains(".png") )
+            if (Routing.Contains(".gif") || Routing.Contains(".css") || Routing.Contains(".img") || Routing.Contains(".png"))
             {
                 log.AdditionalParams = " ";
                 log.Isvalid = false;
