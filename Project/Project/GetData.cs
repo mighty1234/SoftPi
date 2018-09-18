@@ -10,14 +10,15 @@ using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
+using System.Data.Entity.Validation;
 
 namespace Project
 {
-
+   
     /// <summary>  
     ///  This class use to  optimize work GetLocation method .  
     /// </summary>  
-    
+
     public class Pair
     {
         public string Key { get; set; }
@@ -30,21 +31,21 @@ namespace Project
     /// </summary>  
     static class GetData
     {
-       static  Dictionary<string, string> iplocal = new Dictionary<string, string>();
 
-        static  public Pair _lastIp = new Pair();
+       static Dictionary<string, string> iplocal = new Dictionary<string, string>();
+
+
+
         /// <param name="Unparsed">Used to form and return instance of LogModel</param>
         static public LogModel ParseToModel(string unparsed)
         {
-              
-            LogModel log = new LogModel();
+            
 
-            if (!iplocal.Keys.Contains(unparsed.Substring(0, unparsed.IndexOf(' '))))
-            {
-                iplocal.Add(unparsed.Substring(0, unparsed.IndexOf(' ')), GetLocation(unparsed.Substring(0, unparsed.IndexOf(' '))));
-            }
+            LogModel log = new LogModel();            
             log.IpOrHost = unparsed.Substring(0, unparsed.IndexOf(' '));//IpOrHost   
             unparsed=unparsed.Remove(0, log.IpOrHost.Length + 6);
+            if (!iplocal.Keys.Contains(log.IpOrHost))
+                iplocal.Add(log.IpOrHost, GetLocation(log.IpOrHost));
 
             log.RequestTime = (unparsed.Substring(0, unparsed.IndexOf(']')));// DateTime
             unparsed = unparsed.Remove(0, log.RequestTime.Length +3);
@@ -60,13 +61,13 @@ namespace Project
             log.FileName = GetFileName(log.AdditionalParams);
 
 
-            if (log.IpOrHost.Contains(iplocal.Keys.ToString()))
+            if (iplocal.Keys.Contains(log.IpOrHost))
             {
 
-                log.Location = iplocal.Single(x => x.Key == log.IpOrHost).Value;
+                log.Location = iplocal.First(x => x.Key == log.IpOrHost).Value;
             }
-            log.Location = _lastIp.Key == log.IpOrHost ? _lastIp.Value :  GetLocation(log.IpOrHost);
-           _lastIp.Key =log.IpOrHost;
+           
+          // iplocal.Keys.where =log.IpOrHost;
 
             log.Result = unparsed.Substring(0, unparsed.IndexOf(' '));
             unparsed = unparsed.Remove(0, log.Result.Length + 1);
@@ -76,33 +77,51 @@ namespace Project
             unparsed = unparsed.Remove(0, log.Size.ToString().Length);
 
 
+            if (log.Location.Split(',') == null)
+            {
+                log.Isvalid = false;
+            }
             return log;
         }
 
         /// <param name="IpOrHost">Used to find location</param>
              public static string GetLocation(string ipOrHost)
         {
+            string result;
+            string locationResponse;
+            string Query = @"https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_CvO8ofyO9wCpB3k9sdcbNSwO3fyxH&domainName=" + ipOrHost;
+            try
+            {
+                locationResponse = new WebClient().DownloadString(Query);
+            }
+            catch (WebException)
+            {
 
-            //string locationResponse;
-            //string Query = @"https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_faKGbxo5VlpRVZ0y8TVRcaqbfBpEP&domainName=" + ipOrHost;
-            //try
-            //{
-            //    locationResponse = new WebClient().DownloadString(Query);
-            //}
-            //catch (WebException)
-            //{
+             result = "Invalid IP or Host";
+                return result;
+            }
 
-            //    _lastIp.Value = "Invalid IP or Host";
-            //    return _lastIp.Value;
-            //}
+            var responseXml = XDocument.Parse(locationResponse)
+                .Element("WhoisRecord").Element("registrant");
 
-            //var responseXml = XDocument.Parse(locationResponse)
-            //    .Element("WhoisRecord").Element("registrant");
+            if (responseXml == null)
+            {
+                responseXml = XDocument.Parse(locationResponse)
+                .Element("WhoisRecord").Element("registryData").Element("registrant");
+                //if (responseXml == )
+                //{
+                //    return
+
+                //}
+
+            }
+     
+            result = (responseXml.Element("organization").Value!=null)? responseXml.Element("organization").Value:"No organization" + "," + ((responseXml.Element("country").Value != null) ? responseXml.Element("country").Value : "no country") ;
+
+          
 
 
-            //  _lastIp.Value = responseXml.Element("organization").Value + "," + responseXml.Element("country").Value;
-
-            return "kek";//_lastIp.Value;
+            return result;//_lastIp.Value;
 
         }
 
@@ -159,7 +178,8 @@ namespace Project
         {
             string ReturnValue = null;
             string Routing = log.Routing;
-            if (Routing.Contains(".gif") || Routing.Contains(".css") || Routing.Contains(".img") || Routing.Contains(".png"))
+            if (Routing.Contains(".gif") || Routing.Contains(".css") || Routing.Contains(".img") || Routing.Contains(".png")
+                || log.RequestType=="PUT"|| log.RequestType == "UPDATE" )
             {
                 log.AdditionalParams = " ";
                 log.Isvalid = false;
@@ -192,7 +212,7 @@ namespace Project
                     }
 
                 }
-                log.Routing =log.Routing+ ADdinfo[1].Substring(0, ADdinfo[0].LastIndexOf(' '));
+                log.Routing =log.Routing.Replace(ADdinfo[1],"");
                 log.Isvalid = true;
             }
            
@@ -205,12 +225,14 @@ namespace Project
         /// <param name = "logModel" > Used to save instance of model in DB  </ param >
         public static void LoadToDB(LogModel n)
         {
-            SoftPiEntities2 piEntities2 = new SoftPiEntities2();
+            
+            SoftPiEntities piEntities2 = new SoftPiEntities();
             IP ip = new IP()
             {
                 Ip1 = Encoding.ASCII.GetBytes(n.IpOrHost),
                 Company = n.Location.Split(',')[0],
                 Country = n.Location.Split(',')[1]
+                
             };
             File file = new File()
             {
@@ -224,18 +246,45 @@ namespace Project
                 piEntities2.IP.Add(ip);
                 piEntities2.SaveChanges();
             }
+            /////
+            piEntities2.IP.Add(ip);
+            piEntities2.SaveChanges();
+            ////
             piEntities2.File.Add(file);
             piEntities2.SaveChanges();
+            var y = Encoding.ASCII.GetBytes(n.IpOrHost);
+            //  var u = piEntities2.IP.First(x => x.Ip1.SequenceEqual(y));
+            var log = new Log();
 
-            piEntities2.Log.Add(new Log()
+            log.File = piEntities2.File.FirstOrDefault(x => x.Id == file.Id);
+            log.IP = piEntities2.IP.FirstOrDefault(x => x.Id == ip.Id);
+
+                log.File_path_id = log.File.Id;
+            log.Ip_id = piEntities2.IP.First(x => x.Ip1 == ip.Ip1).Id;
+            log.requestTime = n.RequestTime.ToString();
+           log.requestType = n.RequestType.ToString();
+           log.result = int.Parse(n.Result);
+            
+            piEntities2.Log.Add(log);
+            try
             {
-                File_path_id = file.Id,
-                Ip_id = piEntities2.IP.First(x => x.Ip1 == Encoding.ASCII.GetBytes(n.IpOrHost)).Id,
-                requestTime = n.RequestTime.ToString(),
-                requestType = n.RequestTime.ToString(),
-                result = int.Parse(n.Result)
-            });
-            piEntities2.SaveChanges();
+                piEntities2.SaveChanges();
+            }
+            catch (DbEntityValidationException ex)
+            {
+
+                foreach (DbEntityValidationResult validationError in ex.EntityValidationErrors)
+                {
+                    MessageBox.Show("Object: " + validationError.Entry.Entity.ToString());
+                    MessageBox.Show("");
+                    foreach (DbValidationError err in validationError.ValidationErrors)
+                    {
+                        MessageBox.Show(err.ErrorMessage + "");
+                    }
+
+                    MessageBox.Show(ex.ToString());
+                }
+            }
 
 
 
@@ -251,7 +300,14 @@ namespace Project
             }
             else
             {
-               return  additionalInfo.Substring(additionalInfo.LastIndexOf('/'), additionalInfo.Length);
+                if (additionalInfo.LastIndexOf('/')<0)
+                {
+                    return "No FIle";
+                }
+                else
+                {
+                    return additionalInfo.Substring(additionalInfo.LastIndexOf('/'), additionalInfo.Length);
+                }
             }
            
 }
