@@ -10,7 +10,7 @@
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="Path" Type="nvarchar" MaxLength="256" />
+          <Property Name="Path" Type="nvarchar(max)" />
           <Property Name="Name" Type="nvarchar" MaxLength="256" />
           <Property Name="Size" Type="int" />
         </EntityType>
@@ -31,8 +31,8 @@
           <Property Name="Ip_id" Type="int" />
           <Property Name="File_path_id" Type="int" />
           <Property Name="result" Type="int" />
-          <Property Name="requestType" Type="nvarchar" MaxLength="1" />
-          <Property Name="requestTime" Type="nvarchar" MaxLength="1" />
+          <Property Name="requestType" Type="nvarchar" MaxLength="256" />
+          <Property Name="requestTime" Type="nvarchar" MaxLength="256" />
         </EntityType>
         <Association Name="FK_Log_File">
           <End Role="File" Type="Self.File" Multiplicity="0..1" />
@@ -81,7 +81,7 @@
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Path" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
+          <Property Name="Path" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="Name" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
           <Property Name="Size" Type="Int32" />
           <NavigationProperty Name="Log" Relationship="Self.FK_Log_File" FromRole="File" ToRole="Log" />
@@ -104,8 +104,8 @@
           <Property Name="Ip_id" Type="Int32" />
           <Property Name="File_path_id" Type="Int32" />
           <Property Name="result" Type="Int32" />
-          <Property Name="requestType" Type="String" MaxLength="1" FixedLength="false" Unicode="true" />
-          <Property Name="requestTime" Type="String" MaxLength="1" FixedLength="false" Unicode="true" />
+          <Property Name="requestType" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
+          <Property Name="requestTime" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="File" Relationship="Self.FK_Log_File" FromRole="Log" ToRole="File" />
           <NavigationProperty Name="IP" Relationship="Self.FK_Log_Ip" FromRole="Log" ToRole="IP" />
         </EntityType>
@@ -133,7 +133,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="SoftPiEntities2" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="SoftPiEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="File" EntityType="Self.File" />
           <EntitySet Name="IP" EntityType="Self.IP" />
           <EntitySet Name="Log" EntityType="Self.Log" />
@@ -151,7 +151,7 @@
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="Хранилище SoftPiModelContainer" CdmEntityContainer="SoftPiEntities2">
+        <EntityContainerMapping StorageEntityContainer="Хранилище SoftPiModelContainer" CdmEntityContainer="SoftPiEntities">
           <EntitySetMapping Name="File">
             <EntityTypeMapping TypeName="SoftPiModel.File">
               <MappingFragment StoreEntitySet="File">

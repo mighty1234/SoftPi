@@ -27,7 +27,7 @@ namespace Project
             int iterator = 0;
 
          
-            GetData.GetLocation("178.255.215.79");
+           // GetData.GetLocation("178.255.215.79");
             // Whois.Lookup("178.255.215.79");
             using (FileStream fs = new FileStream(@"C:\Users\Vlad\Desktop\tariscope.com.log", FileMode.Open, FileAccess.Read))
             {

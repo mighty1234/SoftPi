@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="ed7a168e0c814039a3a97ecf20cdf282" Name="Diagram1" ZoomLevel="10">
+      <Diagram DiagramId="80444ecf1f35418a84802b33cc1e173e" Name="Diagram1" ZoomLevel="10">
         <EntityTypeShape EntityType="SoftPiModel.File" Width="1.5" PointX="0.75" PointY="1.25" IsExpanded="true" />
         <EntityTypeShape EntityType="SoftPiModel.IP" Width="1.5" PointX="0.75" PointY="5.25" IsExpanded="true" />
         <EntityTypeShape EntityType="SoftPiModel.Log" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
