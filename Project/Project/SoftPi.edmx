@@ -133,7 +133,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="SoftPiEntities" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="SoftPiEntities1" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="File" EntityType="Self.File" />
           <EntitySet Name="IP" EntityType="Self.IP" />
           <EntitySet Name="Log" EntityType="Self.Log" />
@@ -151,7 +151,7 @@
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="Хранилище SoftPiModelContainer" CdmEntityContainer="SoftPiEntities">
+        <EntityContainerMapping StorageEntityContainer="Хранилище SoftPiModelContainer" CdmEntityContainer="SoftPiEntities1">
           <EntitySetMapping Name="File">
             <EntityTypeMapping TypeName="SoftPiModel.File">
               <MappingFragment StoreEntitySet="File">

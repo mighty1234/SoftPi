@@ -23,8 +23,7 @@ namespace Project
         public string Routing { get; set; }       
 
         public string AdditionalParams { get; set; }
-
-        public string RequestType { get; set; }
+     
 
         public string Result { get; set; }
 

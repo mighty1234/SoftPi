@@ -14,7 +14,7 @@ using System.Text;
 using System.Data.Entity.Validation;
 
 namespace Project
-{ 
+{
 
     /// <summary>  
     ///  This class use to  optimize work GetLocation method .  
@@ -23,66 +23,58 @@ namespace Project
     public class Pair
     {
         public string Key { get; set; }
-        public string Value { get; set;}
+        public string Value { get; set; }
     }
 
-   
+
     /// <summary>  
     ///  This class contains methods of  transform rows from file add make a LogModel instance.  
     /// </summary>  
     static class GetData
     {
 
-
-
-       static Dictionary<string, string> iplocal = new Dictionary<string, string>();
+        static Dictionary<string, string> iplocal = new Dictionary<string, string>();
 
 
 
         /// <param name="Unparsed">Used to form and return instance of LogModel</param>
         static public LogModel ParseToModel(string unparsed)
         {
-            
 
-            LogModel log = new LogModel();            
+
+            LogModel log = new LogModel();
             log.IpOrHost = unparsed.Substring(0, unparsed.IndexOf(' '));//IpOrHost   
-            unparsed=unparsed.Remove(0, log.IpOrHost.Length + 6);
+            unparsed = unparsed.Remove(0, log.IpOrHost.Length + 6);
             if (!iplocal.Keys.Contains(log.IpOrHost))
                 iplocal.Add(log.IpOrHost, GetLocation(log.IpOrHost));
 
             log.RequestTime = (unparsed.Substring(0, unparsed.IndexOf(']')));// DateTime
-            unparsed = unparsed.Remove(0, log.RequestTime.Length +3);
+            unparsed = unparsed.Remove(0, log.RequestTime.Length + 3);
 
             log.RequestType = unparsed.Substring(0, unparsed.IndexOf(' '));
-            unparsed = unparsed.Remove(0, log.RequestType.Length+1);
+            unparsed = unparsed.Remove(0, log.RequestType.Length + 1);
 
-            log.Routing = unparsed.Substring(0, unparsed.IndexOf('"')-9);//routing 
-            unparsed = unparsed.Remove(0, log.Routing.Length +11);
-
-
-            log.RequestType = unparsed.Substring(0 , unparsed.IndexOf(' '));
-            unparsed = unparsed.Remove(0, log.RequestType.Length);
-
-
-            log.Routing = unparsed.Substring(0,unparsed.IndexOf('"')); //routing 
-            unparsed = unparsed.Remove(0, log.Routing.Length+2);
+            log.Routing = unparsed.Substring(0, unparsed.IndexOf('"') - 9);//routing 
+            unparsed = unparsed.Remove(0, log.Routing.Length + 11);
 
             log.AdditionalParams = GetAddInfo(log);//Additional params
-            unparsed = unparsed.Remove(0, log.AdditionalParams.Length==1?0: log.AdditionalParams.Length);
-            
-            log.Location = iplocal.Keys.Contains(log.IpOrHost)? iplocal.First(x=>x.Key==log.IpOrHost).Value :  GetLocation(log.IpOrHost);
-          
-
-            log.Result = unparsed.Substring(0, unparsed.IndexOf(' '));//Result
-            unparsed = unparsed.Remove(0, log.Result.Length+1);
-
-            log.Size =int.Parse(unparsed.Substring(0, unparsed.IndexOf(' ')));//Size
 
             log.FileName = GetFileName(log.AdditionalParams);
 
 
+            if (iplocal.Keys.Contains(log.IpOrHost))
+            {
 
-            log.Size = int.Parse((unparsed.Substring( 0,unparsed.IndexOf(' '))));//Size
+                log.Location = iplocal.First(x => x.Key == log.IpOrHost).Value;
+            }
+
+            // iplocal.Keys.where =log.IpOrHost;
+
+            log.Result = unparsed.Substring(0, unparsed.IndexOf(' '));
+            unparsed = unparsed.Remove(0, log.Result.Length + 1);
+
+
+            log.Size = int.Parse((unparsed.Substring(0, unparsed.IndexOf(' '))));//Size
             unparsed = unparsed.Remove(0, log.Size.ToString().Length);
 
 
@@ -92,61 +84,40 @@ namespace Project
             }
             return log;
         }
+    
 
         /// <param name="IpOrHost">Used to find location</param>
-             public static string GetLocation(string ipOrHost)
+        public static string GetLocation(string ipOrHost)
         {
 
-            string result;
+            string value;
             string locationResponse;
             string Query = @"https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_CvO8ofyO9wCpB3k9sdcbNSwO3fyxH&domainName=" + ipOrHost;
 
-            try
-            {
-                locationResponse = new WebClient().DownloadString(Query);
-            }
-            catch (WebException)
-            {
-
-
-                value = "Invalid IP or Host";
-                return value;
-
-            }
-
             
+                locationResponse = new WebClient().DownloadString(Query);       
+
+
+
+         
+
+
             var responseXml = XDocument.Parse(locationResponse)
                 .Element("WhoisRecord").Element("registrant");
             if (responseXml == null)
             {
                 responseXml = XDocument.Parse(locationResponse)
                .Element("WhoisRecord").Element("registryData").Element("registrant");
-            }
-
-            
-            if (responseXml.Element("organization").Value ==null||responseXml.Element("country").Value != null)
-            {
-                              
-                value = responseXml.Element("organization").Value + "," + responseXml.Element("country").Value;          
-
-            if (responseXml == null)
-            {
-                responseXml = XDocument.Parse(locationResponse)
-                .Element("WhoisRecord").Element("registryData").Element("registrant");
-                //if (responseXml == )
-                //{
-                //    return
-
-                //}
-
-            }
-     
-            result = (responseXml.Element("organization").Value!=null)? responseXml.Element("organization").Value:"No organization" + "," + ((responseXml.Element("country").Value != null) ? responseXml.Element("country").Value : "no country") ;
-
-          
+                
+            }         
 
 
-            return result;//_lastIp.Value;
+          value = ((responseXml.Element("organization").Value != null) ? responseXml.Element("organization").Value : "No organization") + "," + ((responseXml.Element("country").Value != null) ? responseXml.Element("country").Value : "no country");
+
+
+
+
+                return value;//_lastIp.Value;
 
         }
 
@@ -193,19 +164,18 @@ namespace Project
             }
             var month = Month.FirstOrDefault(x => x.Key == Tempcontainer);
             var kek = requestTime.Replace("/" + Tempcontainer + "/", "/" + month.Value.ToString() + "/");
-           // DateTime Parsed = DateTime.ParseExact(kek, "dd/MM/yyyy:HH:mm:ss", CultureInfo.CreateSpecificCulture("en-us"));
+            // DateTime Parsed = DateTime.ParseExact(kek, "dd/MM/yyyy:HH:mm:ss", CultureInfo.CreateSpecificCulture("en-us"));
             return kek;
         }
 
         /// <param name = "log" > Used to find additional params an validate it  </ param >
-       
+
         private static string GetAddInfo(LogModel log)
         {
             string ReturnValue = null;
             string Routing = log.Routing;
             if (Routing.Contains(".gif") || Routing.Contains(".css") || Routing.Contains(".img") || Routing.Contains(".png")
-                || log.RequestType=="PUT"|| log.RequestType == "UPDATE" )
-
+                || log.RequestType == "PUT" || log.RequestType == "UPDATE")
             {
                 log.AdditionalParams = " ";
                 log.Isvalid = false;
@@ -216,22 +186,40 @@ namespace Project
                 string[] ADdinfo = Routing.Split('?');
                 if (ADdinfo.Length == 1)
                 {
-                    ReturnValue = " ";
+                    log.Routing = ADdinfo[0];
+                    log.Isvalid = true;
+                    return string.Empty;
+
                 }
-               
+                else
+                {
+                    if (ADdinfo[1] == " ")
+                    {
+                        log.Isvalid = true;
+                        return " ";
+                    }
+                    else
+                    {
+                        for (int i = 1; i < ADdinfo.Length; i++)
+                        {
+                            ReturnValue += ADdinfo[i] + " ";
+                        }
+                        log.Isvalid = true;
+                    }
 
-                log.Routing =log.Routing.Replace(ADdinfo[1],"");
-
+                }
+                log.Routing = log.Routing.Replace(ADdinfo[1], "");
                 log.Isvalid = true;
             }
-           
-        
+
+
             return ReturnValue;
-            }
+        }
 
 
-        public static  void Save(List<string> krk) {
-       
+        public static void Save(List<string> krk)
+        {
+
             List<LogModel> log = new List<LogModel>();
 
             foreach (var item in krk)
@@ -240,24 +228,24 @@ namespace Project
             }
             log.Clear();
 
-         
 
-           // MessageBox.Show("Stop");
-           // Debugger.Break();
+
+            // MessageBox.Show("Stop");
+            // Debugger.Break();
         }
 
 
         /// <param name = "logModel" > Used to save instance of model in DB  </ param >
         public static void LoadToDB(LogModel n)
         {
-            
-            SoftPiEntities piEntities2 = new SoftPiEntities();
+
+            SoftPiEntities1 piEntities2 = new SoftPiEntities1();
             IP ip = new IP()
             {
                 Ip1 = Encoding.ASCII.GetBytes(n.IpOrHost),
                 Company = n.Location.Split(',')[0],
                 Country = n.Location.Split(',')[1]
-                
+
             };
             File file = new File()
             {
@@ -284,32 +272,16 @@ namespace Project
             log.File = piEntities2.File.FirstOrDefault(x => x.Id == file.Id);
             log.IP = piEntities2.IP.FirstOrDefault(x => x.Id == ip.Id);
 
-                log.File_path_id = log.File.Id;
+            log.File_path_id = log.File.Id;
             log.Ip_id = piEntities2.IP.First(x => x.Ip1 == ip.Ip1).Id;
             log.requestTime = n.RequestTime.ToString();
-           log.requestType = n.RequestType.ToString();
-           log.result = int.Parse(n.Result);
-            
+            log.requestType = n.RequestType.ToString();
+            log.result = int.Parse(n.Result);
+
             piEntities2.Log.Add(log);
-            try
-            {
-                piEntities2.SaveChanges();
-            }
-            catch (DbEntityValidationException ex)
-            {
-
-                foreach (DbEntityValidationResult validationError in ex.EntityValidationErrors)
-                {
-                    MessageBox.Show("Object: " + validationError.Entry.Entity.ToString());
-                    MessageBox.Show("");
-                    foreach (DbValidationError err in validationError.ValidationErrors)
-                    {
-                        MessageBox.Show(err.ErrorMessage + "");
-                    }
-
-                    MessageBox.Show(ex.ToString());
-                }
-            }
+           
+           
+                piEntities2.SaveChanges();      
 
 
 
@@ -319,13 +291,13 @@ namespace Project
         }
         public static string GetFileName(string additionalInfo)
         {
-            if (additionalInfo==string.Empty)
+            if (additionalInfo == string.Empty)
             {
                 return "No File";
             }
             else
             {
-                if (additionalInfo.LastIndexOf('/')<0)
+                if (additionalInfo.LastIndexOf('/') < 0)
                 {
                     return "No FIle";
                 }
@@ -334,10 +306,13 @@ namespace Project
                     return additionalInfo.Substring(additionalInfo.LastIndexOf('/'), additionalInfo.Length);
                 }
             }
-           
-}
+
+        }
+
+
     }
 }
+
 
 
 

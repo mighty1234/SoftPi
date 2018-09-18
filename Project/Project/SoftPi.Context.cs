@@ -13,10 +13,10 @@ namespace Project
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class SoftPiEntities : DbContext
+    public partial class SoftPiEntities1 : DbContext
     {
-        public SoftPiEntities()
-            : base("name=SoftPiEntities")
+        public SoftPiEntities1()
+            : base("name=SoftPiEntities1")
         {
         }
     
