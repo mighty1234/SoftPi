@@ -26,26 +26,34 @@ namespace Project
         {
             int iterator = 0;
 
-         
-           // GetData.GetLocation("178.255.215.79");
-            // Whois.Lookup("178.255.215.79");
+
+           
+            // GetData.GetLocation("178.255.215.79");
+            List<string> buffer = new List<string>();
             using (FileStream fs = new FileStream(@"C:\Users\Vlad\Desktop\tariscope.com.log", FileMode.Open, FileAccess.Read))
             {
+           
                 using (StreamReader sr = new StreamReader(fs))
                 {
                     timer.Start();
-                
+                   
+
                     while (!sr.EndOfStream)
                     {
                         var x = sr.ReadLine();
                         buffer.Add(x);
                         iterator++;
-                        if (iterator == 1)
+
+                     
+                        if (iterator == 10)
                         {
                             iterator = 0;
-                            Save(buffer);
+                            GetData.Save(buffer);                         
 
-                            // AsyncHelper.RunAsyncOperation(() => Save(buffer));
+                
+                         
+                                                       // AsyncHelper.RunAsyncOperation(() => Save(buffer));
+
                             buffer.Clear();
                         }
                     }
@@ -59,7 +67,10 @@ namespace Project
             }
             if (buffer.Count != 0)
             {
+                        
+
                 Save(buffer);
+
                 buffer.Clear();
             }
         }

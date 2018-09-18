@@ -9,12 +9,13 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
+
 using System.Text;
 using System.Data.Entity.Validation;
 
 namespace Project
-{
-   
+{ 
+
     /// <summary>  
     ///  This class use to  optimize work GetLocation method .  
     /// </summary>  
@@ -31,6 +32,8 @@ namespace Project
     /// </summary>  
     static class GetData
     {
+
+
 
        static Dictionary<string, string> iplocal = new Dictionary<string, string>();
 
@@ -56,21 +59,27 @@ namespace Project
             log.Routing = unparsed.Substring(0, unparsed.IndexOf('"')-9);//routing 
             unparsed = unparsed.Remove(0, log.Routing.Length +11);
 
+
+            log.RequestType = unparsed.Substring(0 , unparsed.IndexOf(' '));
+            unparsed = unparsed.Remove(0, log.RequestType.Length);
+
+
+            log.Routing = unparsed.Substring(0,unparsed.IndexOf('"')); //routing 
+            unparsed = unparsed.Remove(0, log.Routing.Length+2);
+
             log.AdditionalParams = GetAddInfo(log);//Additional params
+            unparsed = unparsed.Remove(0, log.AdditionalParams.Length==1?0: log.AdditionalParams.Length);
+            
+            log.Location = iplocal.Keys.Contains(log.IpOrHost)? iplocal.First(x=>x.Key==log.IpOrHost).Value :  GetLocation(log.IpOrHost);
+          
+
+            log.Result = unparsed.Substring(0, unparsed.IndexOf(' '));//Result
+            unparsed = unparsed.Remove(0, log.Result.Length+1);
+
+            log.Size =int.Parse(unparsed.Substring(0, unparsed.IndexOf(' ')));//Size
 
             log.FileName = GetFileName(log.AdditionalParams);
 
-
-            if (iplocal.Keys.Contains(log.IpOrHost))
-            {
-
-                log.Location = iplocal.First(x => x.Key == log.IpOrHost).Value;
-            }
-           
-          // iplocal.Keys.where =log.IpOrHost;
-
-            log.Result = unparsed.Substring(0, unparsed.IndexOf(' '));
-            unparsed = unparsed.Remove(0, log.Result.Length + 1);
 
 
             log.Size = int.Parse((unparsed.Substring( 0,unparsed.IndexOf(' '))));//Size
@@ -87,9 +96,11 @@ namespace Project
         /// <param name="IpOrHost">Used to find location</param>
              public static string GetLocation(string ipOrHost)
         {
+
             string result;
             string locationResponse;
             string Query = @"https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_CvO8ofyO9wCpB3k9sdcbNSwO3fyxH&domainName=" + ipOrHost;
+
             try
             {
                 locationResponse = new WebClient().DownloadString(Query);
@@ -97,12 +108,26 @@ namespace Project
             catch (WebException)
             {
 
-             result = "Invalid IP or Host";
-                return result;
+
+                value = "Invalid IP or Host";
+                return value;
+
             }
 
+            
             var responseXml = XDocument.Parse(locationResponse)
                 .Element("WhoisRecord").Element("registrant");
+            if (responseXml == null)
+            {
+                responseXml = XDocument.Parse(locationResponse)
+               .Element("WhoisRecord").Element("registryData").Element("registrant");
+            }
+
+            
+            if (responseXml.Element("organization").Value ==null||responseXml.Element("country").Value != null)
+            {
+                              
+                value = responseXml.Element("organization").Value + "," + responseXml.Element("country").Value;          
 
             if (responseXml == null)
             {
@@ -180,6 +205,7 @@ namespace Project
             string Routing = log.Routing;
             if (Routing.Contains(".gif") || Routing.Contains(".css") || Routing.Contains(".img") || Routing.Contains(".png")
                 || log.RequestType=="PUT"|| log.RequestType == "UPDATE" )
+
             {
                 log.AdditionalParams = " ";
                 log.Isvalid = false;
@@ -190,29 +216,12 @@ namespace Project
                 string[] ADdinfo = Routing.Split('?');
                 if (ADdinfo.Length == 1)
                 {
-                    log.Routing = ADdinfo[0];
-                    log.Isvalid = true;
-                    return string.Empty;
-                    
+                    ReturnValue = " ";
                 }
-                else
-                {
-                    if (ADdinfo[1] == " ")
-                    {
-                        log.Isvalid = true;
-                        return " ";
-                    }
-                    else
-                    {
-                        for (int i = 1; i < ADdinfo.Length; i++)
-                        {                            
-                            ReturnValue += ADdinfo[i] + " ";
-                        }
-                        log.Isvalid = true;
-                    }
+               
 
-                }
                 log.Routing =log.Routing.Replace(ADdinfo[1],"");
+
                 log.Isvalid = true;
             }
            
@@ -220,6 +229,22 @@ namespace Project
             return ReturnValue;
             }
 
+
+        public static  void Save(List<string> krk) {
+       
+            List<LogModel> log = new List<LogModel>();
+
+            foreach (var item in krk)
+            {
+                log.Add(ParseToModel(item));
+            }
+            log.Clear();
+
+         
+
+           // MessageBox.Show("Stop");
+           // Debugger.Break();
+        }
 
 
         /// <param name = "logModel" > Used to save instance of model in DB  </ param >

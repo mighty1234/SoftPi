@@ -11,11 +11,16 @@ namespace Project
     /// </summary>  
     class LogModel
     {
+
+
         public string RequestTime { get; set; }
+
 
         public string IpOrHost { get; set; }
 
-        public string Routing { get; set; }
+        public string RequestType { get; set; }
+
+        public string Routing { get; set; }       
 
         public string AdditionalParams { get; set; }
 
