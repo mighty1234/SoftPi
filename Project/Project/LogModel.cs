@@ -11,7 +11,10 @@ namespace Project
     /// </summary>  
     class LogModel
     {
-        public  string RequestTime { get; set; }
+
+
+        public string RequestTime { get; set; }
+
 
         public string IpOrHost { get; set; }
 
@@ -21,6 +24,8 @@ namespace Project
 
         public string AdditionalParams { get; set; }
 
+        public string RequestType { get; set; }
+
         public string Result { get; set; }
 
         public string Location { get; set; }
@@ -28,6 +33,8 @@ namespace Project
         public int Size { get; set; }
 
         public bool Isvalid { get; set; }
-     }
+
+        public string FileName { get; set; }
+    }
 
 }
