@@ -109,12 +109,15 @@ namespace Project
                 responseXml = XDocument.Parse(locationResponse)
                .Element("WhoisRecord").Element("registryData").Element("registrant");
                 
-            }         
-
-
-          value = ((responseXml.Element("organization").Value != null) ? responseXml.Element("organization").Value : "No organization") + "," + ((responseXml.Element("country").Value != null) ? responseXml.Element("country").Value : "no country");
-
-
+            }
+            try
+            {
+                value = ((responseXml.Element("organization").Value != null) ? responseXml.Element("organization").Value : "No organization") + "," + ((responseXml.Element("country").Value != null) ? responseXml.Element("country").Value : "no country");
+            }
+            catch (Exception ex)
+            {
+                value = "invalid format";
+            }
 
 
                 return value;//_lastIp.Value;
