@@ -1,0 +1,32 @@
+
+body {
+  display: flex;
+  min-height: 100px;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+}
+.page-header{
+
+  background-image: url('/src/images/header.jpg');
+  background-size: cover;
+  height: 200px;
+  position: relative;
+
+}
+.white-text{
+  aling: right;
+}
+.authorizarion{
+  color:red !important;
+ background-color: chartreuse;
+  display: inline-block;
+  position: absolute;
+  right: 0;
+
+}
+
+
+

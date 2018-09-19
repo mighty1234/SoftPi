@@ -1,0 +1,23 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+ }
+
+ul {
+  list-style: none;
+}
+
+li {
+  padding: 10px;
+  background: #B5F5BA;
+  width: 200px;
+  margin-bottom: 3px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font: 20px Verdana;
+}
+
+li img {
+  margin-right: 10px;
+}
