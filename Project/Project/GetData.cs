@@ -246,8 +246,8 @@ namespace Project
             IP ip = new IP()
             {
                 Ip1 = Encoding.ASCII.GetBytes(n.IpOrHost),
-                Company = n.Location.Split(',')[0],
-                Country = n.Location.Split(',')[1]
+                Company =(n.Location== "invalid format")?"no company " :n.Location.Split(',')[0],
+                Country = (n.Location == "invalid format") ? "no country" : n.Location.Split(',')[1],
 
             };
             File file = new File()
@@ -300,14 +300,15 @@ namespace Project
             }
             else
             {
-                if (log.Routing.LastIndexOf('/') < 0)
+                if (log.Routing.LastIndexOf('/') < 0 || log.Routing.LastIndexOf('/')==log.Routing.Length-1)
                 {
                     return "No FIle";
                 }
                 else
                 {
                     string filename = log.Routing.Substring(log.Routing.LastIndexOf('/')+1, log.Routing.Length- log.Routing.LastIndexOf('/')-1);
-                  log.Routing=  log.Routing.Replace(filename,"");
+                    filename = (filename.Length > 256) ? "Invalid name" : filename;
+                    log.Routing=  log.Routing.Replace(filename,"");
                     return filename;
                 }
             }
