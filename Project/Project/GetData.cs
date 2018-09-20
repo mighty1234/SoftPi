@@ -59,7 +59,7 @@ namespace Project
 
             log.AdditionalParams = GetAddInfo(log);//Additional params
 
-            log.FileName = GetFileName(log);
+            log.FileName = GetFileName(ref log);
 
 
             if (iplocal.Keys.Contains(log.IpOrHost))
@@ -292,7 +292,7 @@ namespace Project
 
 
         }
-        public static string GetFileName(LogModel log)
+        public static string GetFileName( ref LogModel log)
         {
             if (log.Routing == string.Empty)
             {
@@ -306,8 +306,8 @@ namespace Project
                 }
                 else
                 {
-                      string filename = log.Routing.Substring(log.Routing.LastIndexOf('/')+1, log.Routing.Length- log.Routing.LastIndexOf('/'));
-                    log.Routing.Replace(filename,"");
+                    string filename = log.Routing.Substring(log.Routing.LastIndexOf('/')+1, log.Routing.Length- log.Routing.LastIndexOf('/')-1);
+                  log.Routing=  log.Routing.Replace(filename,"");
                     return filename;
                 }
             }
